@@ -10,17 +10,25 @@ host = os.environ.get('HOST', 'google.com')
 key = os.environ.get('KEY', True)
 
 
-import ping3
+
+import requests
+from bs4 import BeautifulSoup
+
 
 def ping(host):
-    """
-    Returns True if host (str) responds to a ping request.
-    """
-    for i in range(0, 4):
-        res = ping3.ping(host)
-        time.sleep(1)
+    headers = {"Access-Control-Allow-Origin": "*", 'Content-Type': 'application/json'}
 
-    return res
+    s = requests.get(f'https://2whois.ru/?t=ping&data={host}')
+    # answer = s.text
+    bs = BeautifulSoup(s.text)
+    answer = bs.find('pre')
+    loss = answer.text.find('received')
+    packet = answer.text.find('% packet loss')
+    result = answer.text[loss+10:packet]
+    if int(result) ==100:
+        return 0
+    else:
+        return 1
 
 
 while True:
@@ -37,5 +45,3 @@ while True:
         print(result)
         bot.send_message(chat_id=chat_id, text=result)
     time.sleep(sec)
-
-
