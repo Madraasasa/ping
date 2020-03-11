@@ -7,34 +7,34 @@ bot = telebot.TeleBot(token=token)
 chat_id = os.environ.get('CHAT_ID', 120929625)
 sec = os.environ.get('SEC', 600)
 host = os.environ.get('HOST', 'google.com')
+key = os.environ.get('KEY', True)
 
 
-import platform    # For getting the operating system name
-import subprocess  # For executing a shell command
+import ping3
 
 def ping(host):
     """
     Returns True if host (str) responds to a ping request.
-    Remember that a host may not respond to a ping (ICMP) request even if the host name is valid.
     """
+    for i in range(0, 4):
+        res = ping3.ping(host)
+        time.sleep(1)
 
-    # Option for the number of packets as a function of
-    param = '-n' if platform.system().lower()=='windows' else '-c'
+    return res
 
-    # Building the command. Ex: "ping -c 1 google.com"
-    command = ['ping', param, '1', host]
-
-    return subprocess.call(command) == 0
 
 while True:
     a = ping(host)
     result = host
+
     if a:
         result += '---- up'
-        print('-----')
-        bot.send_message(chat_id=chat_id, text=result)
+        print(result)
+        if key:
+            bot.send_message(chat_id=chat_id, text=result)
+
     else:
-        result += '---- down'
+        print(result)
         bot.send_message(chat_id=chat_id, text=result)
     time.sleep(sec)
 
